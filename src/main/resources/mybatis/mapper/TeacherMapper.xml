@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "mybatis-3-mapper.dtd">
+<mapper namespace="com.topcheersc.schoolsystem.mapper.TeacherMapper">
+    <resultMap id="teacherMap" type="teacher">
+        <id property="ID" column="ID"/>
+        <result property="NAME" column="NAME"/>
+        <result property="GENDER" column="GENDER"/>
+        <result property="AGE" column="AGE"/>
+        <result property="BIRTHDAY" column="BIRTHDAY"/>
+    </resultMap>
+
+    <select id="listTeacher" resultMap="teacherMap">
+       SELECT *
+  FROM (SELECT A.*, ROWNUM RN
+          FROM (SELECT * FROM T_TEACHER ORDER  BY ID) A
+         WHERE ROWNUM &lt;= #{page}*#{limit})
+ WHERE RN > (#{page}-1)*#{limit}
+    </select>
+    
+    <delete id="deleteById" parameterType="Integer">
+        delete from T_TEACHER where ID = #{ID}
+    </delete>
+
+    
+    <update id="update"> 
+        UPDATE T_TEACHER
+     <trim prefix="SET" suffixOverrides=",">
+             <if test="null != teacher.NAME and '' != teacher.NAME">
+                NAME = #{teacher.NAME},
+            </if>
+             <if test="null != teacher.GENDER and '' != teacher.GENDER">
+                GENDER = #{teacher.GENDER},
+            </if>
+             <if test="null != teacher.AGE and '' != teacher.AGE">
+                AGE = #{teacher.AGE},
+            </if>
+             <if test="null != teacher.BIRTHDAY and '' != teacher.BIRTHDAY">
+                BIRTHDAY = TO_DATE(#{teacher.BIRTHDAY}, 'yyyy-mm-dd hh24:mi:ss')
+            </if>
+        </trim>
+            WHERE ID = #{teacher.ID}
+    </update>
+    
+    <select id="countTeacher" resultType="Integer">
+        select count(ID) from T_TEACHER
+    </select>
+    
+    <delete id="batchDelete">
+        delete from T_TEACHER where ID in
+        <foreach collection="list" item="id"
+                 open="(" close=")" index="index" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <insert id="saveTeacher">
+        insert into T_TEACHER
+            values(#{teacher.ID},#{teacher.NAME},#{teacher.GENDER},#{teacher.AGE},TO_DATE(#{teacher.BIRTHDAY}, 'yyyy-mm-dd hh24:mi:ss'))
+    </insert>
+    
+    <select id="queryByCondition" resultMap="teacherMap">
+        SELECT * FROM 
+            (SELECT A.*, ROWNUM RN FROM 
+                (select * from T_TEACHER
+                    <where>
+                        <!--where标签自动去掉满足条件的第一个and -->
+                        <if test="id != null">
+                            and ID = #{id}
+                        </if>
+                        <if test="name != null and name != '' ">
+                            and NAME like '%'||#{name}||'%'
+                        </if>
+                        <if test="gender != null and gender != ''">
+                            and GENDER = #{gender}
+                        </if>
+                    </where>
+                  ) A
+              WHERE ROWNUM &lt;= #{page}*#{limit})
+                WHERE RN > (#{page}-1)*#{limit}
+    </select>
+</mapper>

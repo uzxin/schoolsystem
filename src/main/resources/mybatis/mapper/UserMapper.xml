@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "mybatis-3-mapper.dtd">
+<mapper namespace="com.topcheersc.schoolsystem.mapper.UserMapper">
+    <resultMap id="userMap" type="user">
+        <id property="ID" column="ID"/>
+        <result property="NAME" column="NAME"/>
+        <result property="GENDER" column="GENDER"/>
+        <result property="AGE" column="AGE"/>
+        <result property="BIRTHDAY" column="BIRTHDAY"/>
+    </resultMap>
+
+    <select id="listUser" resultMap="userMap">
+       SELECT *
+  FROM (SELECT A.*, ROWNUM RN
+          FROM (SELECT * FROM T_USER ORDER  BY ID) A
+         WHERE ROWNUM &lt;= #{page}*#{limit})
+ WHERE RN > (#{page}-1)*#{limit}
+    </select>
+    
+    <delete id="deleteById" parameterType="Integer">
+        delete from T_USER where ID = #{ID}
+    </delete>
+
+    
+	<update id="update"> 
+	    UPDATE T_USER
+	 <trim prefix="SET" suffixOverrides=",">
+	         <if test="null != user.NAME and '' != user.NAME">
+	            NAME = #{user.NAME},
+	        </if>
+	         <if test="null != user.GENDER and '' != user.GENDER">
+	            GENDER = #{user.GENDER},
+	        </if>
+	         <if test="null != user.AGE and '' != user.AGE">
+	            AGE = #{user.AGE},
+	        </if>
+	         <if test="null != user.BIRTHDAY and '' != user.BIRTHDAY">
+	            BIRTHDAY = TO_DATE(#{user.BIRTHDAY}, 'yyyy-mm-dd hh24:mi:ss')
+	        </if>
+	    </trim>
+	        WHERE ID = #{user.ID}
+	</update>
+    
+    <select id="countUser" resultType="Integer">
+        select count(ID) from T_USER
+    </select>
+    
+    <delete id="batchDelete">
+        delete from T_USER where ID in
+        <foreach collection="list" item="id"
+                 open="(" close=")" index="index" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <insert id="saveUser">
+        insert into T_USER
+            values(#{user.ID},#{user.NAME},#{user.GENDER},#{user.AGE},TO_DATE(#{user.BIRTHDAY}, 'yyyy-mm-dd hh24:mi:ss'))
+    </insert>
+    
+    <insert id="saveClassStudent">
+        insert into T_CLASS_STUDENT
+            values(#{user.ID},#{user.CLASS_ID})
+    </insert>
+    
+    <select id="queryByCondition" resultMap="userMap">
+        SELECT * FROM 
+            (SELECT A.*, ROWNUM RN FROM 
+                (select * from T_USER
+			        <where>
+			            <!--where标签自动去掉满足条件的第一个and -->
+			            <if test="id != null">
+			                and ID = #{id}
+			            </if>
+			            <if test="name != null and name != '' ">
+			                and NAME like '%'||#{name}||'%'
+			            </if>
+			            <if test="gender != null and gender != ''">
+			                and GENDER = #{gender}
+			            </if>
+                    </where>
+                  ) A
+              WHERE ROWNUM &lt;= #{page}*#{limit})
+                WHERE RN > (#{page}-1)*#{limit}
+    </select>
+    
+    <select id="getClassByUserId" resultType="com.topcheersc.schoolsystem.pojo.ClassPO">
+      SELECT * FROM T_CLASS WHERE ID = (
+            SELECT CLASS_ID FROM T_CLASS_STUDENT WHERE STUDENT_ID = #{ID})
+    </select>
+    
+    <select id="listClassMates" resultMap="userMap">
+        select * from T_USER WHERE ID in (
+            select STUDENT_ID FROM T_CLASS_STUDENT WHERE CLASS_ID = #{classID})
+    </select>
+    
+</mapper>

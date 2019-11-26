@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>添加学生</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="http://localhost:8080/schoolsystem/assets/libs/layui/css/layui.css" media="all">
+    <script src="http://localhost:8080/schoolsystem/assets/libs/layui/layui.js"></script>
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
+</head>
+<body>
+<form class="layui-form" action="">
+  <div class="layui-form-item">
+    <label class="layui-form-label">姓名</label>
+    <div class="layui-input-block">
+      <input style="width: 200px" type="text" name="name" required  lay-verify="required" placeholder="请输入姓名" autocomplete="off" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">性别</label>
+    <div class="layui-input-block">
+      <input type="radio" name="gender" value="1" title="男" checked>
+      <input type="radio" name="gender" value="0" title="女">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">年龄11</label>
+    <div class="layui-input-block">
+      <input style="width: 75px" type="number" name="age"  lay-verify="number" value="18" autocomplete="off" class="layui-input">
+    <div class="layui-form-mid layui-word-aux">范围0-999</div>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">班级</label>
+	    <div class="layui-input-inline">
+          <select name="class_ID" id="class_ID">
+            <option value="">---请选择---</option>
+            <option value="1">软工172</option>
+            <option value="2">计算机162</option>
+            <option value="3">跳绳2班</option>
+          </select>
+        </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">生日</label>
+    <div class="layui-input-block">
+      <input style="width: 200px" type="text" id="birthday" name="birthday" class="layui-input" placeholder="yyyy-mm-dd hh24:mi:ss">
+      <script>
+        layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        
+        //执行一个laydate实例
+        laydate.render({
+          elem: '#birthday' //指定元素
+          ,type:'datetime'
+        });
+      });
+      </script>
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <div class="layui-input-block">
+      <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+      <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+  </div>
+</form>
+ 
+<script>
+//Demo
+layui.use('form', function(){
+  var form = layui.form;
+  
+  //监听提交
+  form.on('submit(formDemo)', function(data){
+	  $.ajax({
+		    url:'http://localhost:8080/schoolsystem/user/addUser',
+		    type:'POST', //GET
+		    async:false,    //或false,是否异步
+		    data: {'data':JSON.stringify(data.field)},
+		    timeout:5000,    //超时时间
+		    dataType:'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+		    success:function(data){
+		    	if(data.code == 0){
+                    layer.alert("添加成功",{icon: 1,time:2000},function () {
+                          layer.close(layer.index); 
+                          window.parent.location.reload();    //重新加载父页面，进行数据刷新
+                      });   
+                  } else{
+                      layer.alert("添加失败",{icon: 2,time:2000});
+                  }
+		    },
+
+		})
+    return false;
+  });
+});
+</script>
+ 
+
+
+</body>
+</html>

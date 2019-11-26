@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>同班同学</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="http://localhost:8080/schoolsystem/assets/libs/layui/css/layui.css" media="all">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
+
+</head>
+
+<body>
+<table id="layTable" lay-filter="test"></table>
+    <script src="http://localhost:8080/schoolsystem/assets/libs/layui/layui.js"></script>
+    <script th:inline="none">
+    var class_ID=sessionStorage.getItem("class_ID");
+            layui.use('table', function(){
+                var table = layui.table;
+                table.render({
+                    //对象表格的id
+                    elem: '#layTable'
+                    //请求路径
+                    ,url:'/schoolsystem/user/listClassMates?CLASS_ID='+class_ID
+                    //数据
+                    ,cols: [[
+                        //layui 2.40之后的新特性，可以增加一个 hide:true 属性，隐藏该列
+                        {field: 'id', title: 'ID', width:80, sort: true, fixed: 'left'}
+                          ,{field: 'name', title: '姓名', width:100}
+                          ,{field: 'gender', title: '性别', width:60,templet: 
+                              function(d){return d.gender=='1'?'男':'女'}}
+                          ,{field: 'age', title: '年龄', width:80, sort: true} 
+                          ,{field: 'birthday', title: '出生日期', width: 200}
+                    ]]
+                    //开启分页
+                });
+            });
+</script>
+
+
+
+
+</body>
+
+</html>

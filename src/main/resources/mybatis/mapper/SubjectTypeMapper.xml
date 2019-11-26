@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "mybatis-3-mapper.dtd">
+<mapper namespace="com.topcheersc.schoolsystem.mapper.SubjectTypeMapper">
+    <resultMap id="subjectTypeMap" type="subjectType">
+        <id property="ID" column="ID"/>
+        <result property="NAME" column="NAME"/>
+        <result property="P_ID" column="P_ID"/>
+    </resultMap>
+
+	<select id="getTypeNameById" resultType="String">
+	    select NAME from T_SUBJECT_TYPE
+	        WHERE ID = #{ID}
+	</select>
+
+	<select id="listSubjectType" resultMap="subjectTypeMap">
+	    select * from T_SUBJECT_TYPE order by ID
+	</select>
+
+    <select id="countSubjectType" resultType="Integer">
+        select count(ID) from T_SUBJECT_TYPE
+    </select>
+    
+	<update id="update"> 
+	        UPDATE T_SUBJECT_TYPE SET
+	             <if test="null != subjectType.NAME and '' != subjectType.NAME">
+	                NAME = #{subjectType.NAME}
+	            </if>
+	             <if test="null != subjectType.P_ID and '' != subjectType.P_ID">
+	                ,P_ID = #{subjectType.P_ID}
+	            </if>
+	             <if test="null == subjectType.P_ID">
+	                ,P_ID = NULL
+	            </if>
+	            
+	            WHERE ID = #{subjectType.ID}
+	  </update>
+	  
+	  <delete id="deleteById">
+	       delete from T_SUBJECT_TYPE where ID=#{ID}
+	  </delete>
+	  
+	  <delete id="deleteByPid">
+           delete from T_SUBJECT_TYPE where P_ID=#{pid}
+      </delete>
+	  
+	  <delete id="batchDelete">
+        delete from T_SUBJECT_TYPE where ID in
+        <foreach collection="list" item="id"
+                 open="(" close=")" index="index" separator=",">
+            #{id}
+        </foreach>
+      </delete>
+      
+       <insert id="saveSubjectType">
+        insert into T_SUBJECT_TYPE
+            values(#{subjectType.ID},#{subjectType.NAME},#{subjectType.P_ID})
+        </insert>
+</mapper>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "mybatis-3-mapper.dtd">
+<mapper namespace="com.topcheersc.schoolsystem.mapper.SubjectMapper">
+    <resultMap id="subjectMap" type="subject">
+        <id property="ID" column="ID"/>
+        <result property="NAME" column="NAME"/>
+        <result property="TYPE_ID" column="TYPE_ID"/>
+    </resultMap>
+
+    <select id="listSubject" resultMap="subjectMap">
+       SELECT *
+  FROM (SELECT A.*, ROWNUM RN
+          FROM (SELECT * FROM T_SUBJECT ORDER  BY ID) A
+         WHERE ROWNUM &lt;= #{page}*#{limit})
+ WHERE RN > (#{page}-1)*#{limit}
+    </select>
+    
+    <select id="countSubject" resultType="Integer">
+        select count(ID) from T_SUBJECT
+    </select>
+    
+    <select id="queryByCondition" resultMap="subjectMap">
+        SELECT * FROM 
+            (SELECT A.*, ROWNUM RN FROM
+                (select * from T_SUBJECT
+                    <where>
+                        <!--where标签自动去掉满足条件的第一个and -->
+                        <if test="id != null">
+                            and ID = #{id}
+                        </if>
+                        <if test="name != null and name != '' ">
+                            and NAME like '%'||#{name}||'%'
+                        </if>
+                        <if test="type_id != null and type_id != '' ">
+                            and TYPE_ID = #{type_id}
+                        </if>
+                    </where>
+                  ) A
+              WHERE ROWNUM &lt;= #{page}*#{limit})
+                WHERE RN > (#{page}-1)*#{limit}
+    </select>
+    
+    <delete id="deleteById">
+        delete from T_SUBJECT where ID = #{id}
+    </delete>
+    
+    <delete id="batchDelete">
+        delete from T_SUBJECT where ID in
+        <foreach collection="list" item="id"
+                 open="(" close=")" index="index" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <update id="update"> 
+        UPDATE T_SUBJECT
+     <trim prefix="SET" suffixOverrides=",">
+             <if test="null != subject.NAME and '' != subject.NAME">
+                NAME = #{subject.NAME},
+            </if>
+             <if test="null != subject.TYPE_ID">
+                TYPE_ID = #{subject.TYPE_ID},
+            </if>
+        </trim>
+            WHERE ID = #{subject.ID}
+    </update>
+    
+    <insert id="saveSubject">
+        insert into T_SUBJECT
+            values(#{subject.ID},#{subject.NAME},#{subject.TYPE_ID})
+    </insert>
+    
+</mapper>

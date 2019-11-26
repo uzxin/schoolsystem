@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>教师管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="http://localhost:8080/schoolsystem/assets/libs/layui/css/layui.css" media="all">
+    <script src="http://libs.baidu.com/jquery/2.0.0/jquery.js"></script>
+
+</head>
+
+<body>
+<blockquote class="layui-elem-quote news_search">
+    <div class="layui-row">
+      <form class="layui-form layui-col-md12 x-so" id="complain_search">
+        教师编号:
+        <div class="layui-input-inline">
+          <input type="text" name="id" id="id"
+            placeholder="请输入教师编号" autocomplete="off" class="layui-input">
+        </div>
+        姓名:
+        <div class="layui-input-inline">
+          <input type="text" name="name" id="name"
+            placeholder="请输入姓名" autocomplete="off" class="layui-input">
+        </div>
+        性别:
+        <div class="layui-input-inline">
+          <select name="gender" id="gender">
+            <option value="">---请选择---</option>
+            <option value="1">男</option>
+            <option value="0">女</option>
+          </select>
+        </div>
+        <!-- <button id="search" class="layui-btn" lay-submit lay-filter="search" data-type="reload">
+          <i class="layui-icon">&#xe615;</i>
+        </button> -->
+        <a class="layui-btn" data-type="reload" id="search" ><i class="layui-icon">&#xe615;</i></a>
+      </form>
+    </div>
+    <table id="layTable" lay-filter="test"></table>
+  </blockquote>
+
+    <script src="http://localhost:8080/schoolsystem/assets/libs/layui/layui.js"></script>
+    <script th:inline="none">
+            layui.use('table', function(){
+                var table = layui.table;
+                table.render({
+                    //对象表格的id
+                    elem: '#layTable'
+                    //头部工具栏
+                    ,toolbar: '#toolbarDemo'
+                    //请求路径
+                    ,url:'/schoolsystem/teacher/listTeacher'
+                    //数据
+                    ,cols: [[
+                        //复选框，fixed为固定位置，即该复选框永远在表格最左侧，同理下面的行内工具栏永远在最右侧
+                        {type: 'checkbox', fixed: 'left'}
+                        //layui 2.40之后的新特性，可以增加一个 hide:true 属性，隐藏该列
+                        ,{field: 'id', title: 'ID', width:80, sort: true, fixed: 'left'}
+                          ,{field: 'name', title: '姓名', width:100}
+                          ,{field: 'gender', title: '性别', width:60,templet: 
+                              function(d){return d.gender=='1'?'男':'女'}}
+                          ,{field: 'age', title: '年龄', width:80, sort: true} 
+                          ,{field: 'birthday', title: '出生日期', width: 200}
+                        //行内工具栏
+                        ,{fixed: 'right', title:'操作', toolbar: '#barlist', width:200,align:'center'}
+                    ]]
+                    //开启分页
+                    ,page: true
+                    ,id:"teachertable"
+                });
+            });
+</script>
+<!--头部工具栏-->
+<script id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="delAll"><i class="layui-icon">&#xe640;</i>批量删除</button>
+        <button class="layui-btn layui-btn-sm" lay-event="add"><i class="layui-icon">&#xe608;</i>添加</button>
+    </div>
+</script>
+
+<!--行内工具栏-->
+<script id="barlist">
+     <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+     <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+   </script>
+
+<script>
+layui.use('table', function(){
+    table = layui.table;
+  //监听行工具事件
+    table.on('tool(test)', function(obj){
+        var data = obj.data;
+        editList=[]; //存放获取到的那条json数据中的value值（不放key）
+        console.log(data);
+        editList.push(data.id);
+        editList.push(data.name);
+        editList.push(data.gender);
+        editList.push(data.age);
+        editList.push(data.birthday);
+        if(obj.event === 'del'){
+            layer.confirm('真的删除行么', function(index){
+                //obj.del();
+                layer.close(index);
+                //开始请求
+                $.ajax({
+                    url: "http://localhost:8080/schoolsystem/teacher/delete",
+                    where:{
+                        'id':data.id
+                    },
+                    type: "post",
+                    async: false,
+                    data: {'id':data.id},
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code == 0) {
+                            layer.alert("删除成功", {icon: 1, time: 2000}, function () {
+                                layer.close(layer.index);
+                                location.reload();    //重新加载父页面，进行数据刷新
+                            });
+                        }
+                    }
+                });
+                //请求完毕
+            });
+        } else if(obj.event === 'detail'){
+            layer.alert(data.id);
+        } else if (obj.event === 'edit') {
+            //脚本编辑弹出层
+            var name = encodeURIComponent(data.toolName);
+            layer.open({
+                type: 2,
+                title: '编辑教师信息', 
+                shadeClose: true,
+                shade: 0.8,
+                maxmin: true,
+                area: ['70%', '70%'],
+                content: 'http://localhost:8080/schoolsystem/page/teacher/editTeacher.jsp?toolSceneId='+data.toolSceneId+'&'+'id='+data.id,//设置你要弹出的jsp页面
+                success: function(layero, index){
+                    var body = layer.getChildFrame('body', index);  
+                    var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();  
+                    var inputList = body.find("input");//获取到子窗口的所有的input标签
+                    for (var i = 0; i < inputList.length; i++ ) {
+                        if (i == 2) {
+                            editList[i]==1?$(inputList[i]).val('男'):$(inputList[i]).val('女');
+                        } else{
+                            $(inputList[i]).val(editList[i]); //遍历子窗口的input标签，将之前数组中的值一次放入显示
+                        }
+                    }
+                }
+             });
+            
+        }
+    });
+    //头工具栏事件
+    table.on('toolbar(test)', function(obj){
+        var checkStatus = table.checkStatus(obj.config.id);
+        switch(obj.event){
+            case 'delAll':
+                var data = checkStatus.data;
+                layer.confirm('真的删除行么', function(){
+                    $.ajax({
+                        url: "http://localhost:8080/schoolsystem/teacher/batchDelete",
+                        type: "post",
+                        async: false,
+                        data: {'data':JSON.stringify(data)},
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.code == 0) {
+                                layer.alert("删除成功", {icon: 1, time: 2000}, function () {
+                                    layer.close(layer.index);
+                                    location.reload();    //重新加载父页面，进行数据刷新
+                                });
+                            }
+                        }
+                    });
+                });
+                break;
+            case 'add':
+                //之前的别动
+                layer.open({
+                    type: 2,
+                    title: '添加教师信息', 
+                    shadeClose: true,
+                    shade: 0.8,
+                    maxmin: true,
+                    area: ['70%', '70%'],
+                    content: 'http://localhost:8080/schoolsystem/page/teacher/addTeacher.html',//设置你要弹出的页面
+                    success: function(layero, index){
+                        
+                    }
+                 });
+                
+                //之后的别动
+                break;
+        };
+    });
+  
+})
+</script>
+
+<script>
+var $ = layui.$, active = {
+        reload: function () {
+            var id = $('#id');
+            var name = $('#name');
+            var gender = $('#gender');
+     
+            //执行重载
+            table.reload('teachertable', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+                , where: {
+                    id: id.val(),//逗号隔开
+                    name: name.val(),
+                    gender:gender.val()
+                }
+            }, 'data');
+        }
+    };
+     
+    $('#search').on('click', function () {
+        var type = $(this).data('type');
+        active[type] ? active[type].call(this) : '';
+    });
+</script>
+
+
+</body>
+
+</html>
