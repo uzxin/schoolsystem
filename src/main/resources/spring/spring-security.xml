@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/security
+    http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!--取消拦截的url地址-->
+    <security:http pattern="index.html" security="none" />
+    <security:http pattern="login.html" security="none" />
+    <security:http pattern="/404.jsp" security="none" />
+    <security:http pattern="/error.jsp" security="none" />
+    <security:http pattern="/assets/*" security="none" />
+
+    <!--
+        auto-config:这个是一个自动配置过滤器(Filter)的属性
+        use-expressions:"是否使用spel表达式"，如果使用表达式：hasRole('ROLE_USER')
+    -->
+    <security:http auto-config="true" use-expressions="false">
+        <security:headers>
+            <security:frame-options policy="SAMEORIGIN"/>
+        </security:headers>
+        <!-- 配置拦截的请求地址以及所需的的权限 -->
+        <security:intercept-url pattern="/page/**" access="ROLE_USER,ROLE_ADMIN" />
+        <security:intercept-url pattern="/user/addUser" access="ROLE_ADMIN" />
+        <security:intercept-url pattern="/user/editUser" access="ROLE_ADMIN" />
+
+        <security:access-denied-handler error-page="/error.jsp"/>
+        <!--
+            登录页面配置
+            login-page:登录页面
+            login-processing-url:处理登录的地址
+            default-target-url:登录成功后默认跳转地址
+            authentication-failure-url:登录失败跳转地址
+         -->
+        <security:form-login
+                login-page="/login.html"
+                login-processing-url="/login"
+                default-target-url="/index.html"
+                authentication-failure-url="/login.html?error=true"
+        />
+        <security:form-login authentication-success-handler-ref="LoginSuccessHandler"/>
+        <security:form-login authentication-failure-handler-ref="LoginFailureHandler"/>
+
+        <!--关闭跨域安全请求-->
+        <security:csrf disabled="true" />
+
+        <!--
+                                退出配置s
+            logout-success-url:退出后跳转地址
+            invalidate-session:让当前session失效
+        -->
+        <security:logout
+                logout-success-url="/login.html?error=注销"
+                invalidate-session="true"
+                logout-url="/logout"
+        />
+    </security:http>
+    <!--配置授权信息-->
+    <!-- <security:authentication-manager>
+        使用自定义认证器
+        <security:authentication-provider >
+            <user-service-ref="MyUserService">
+            <security:user-service>
+                给root 用户 配置 "ROLE_USER" 权限
+                <security:user name="user" password="user" authorities="ROLE_USER" />
+                <security:user name="root" password="root" authorities="ROLE_ADMIN" />
+            </security:user-service>
+        </security:authentication-provider>
+    </security:authentication-manager> -->
+
+    <!--认证管理器-->
+    <security:authentication-manager>
+        <security:authentication-provider user-service-ref="CustomUserDetailsService">
+        </security:authentication-provider>
+    </security:authentication-manager>
+<bean id="CustomUserDetailsService" class="com.topcheersc.schoolsystem.service.impl.CustomUserDetailsService" />
+</beans>

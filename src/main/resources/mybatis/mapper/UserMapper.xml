@@ -96,4 +96,8 @@
             select STUDENT_ID FROM T_CLASS_STUDENT WHERE CLASS_ID = #{classID})
     </select>
     
+    <select id="getUserByUserName" resultMap="userMap">
+        select * from T_USER where NAME=#{username}
+    </select>
+    
 </mapper>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "mybatis-3-mapper.dtd">
+<mapper namespace="com.topcheersc.schoolsystem.mapper.SecurityMapper">
+    <resultMap id="userMap" type="securityuser">
+        <result property="username" column="USERNAME"/>
+        <result property="password" column="PASSWORD"/>
+    </resultMap>
+    <select id="getUserByUserName" resultMap="userMap">
+        select username,password from TEST where username=#{username}
+    </select>
+
+</mapper>

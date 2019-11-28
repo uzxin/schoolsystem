@@ -17,6 +17,7 @@ import com.topcheersc.schoolsystem.vo.UserVO;
  */
 @Mapper
 public interface UserMapper {
+	
 	/**
 	 * 
 	 * @Description:获取所有学生数据
@@ -115,5 +116,13 @@ public interface UserMapper {
 	 */
 	List<User> listClassMates(int classID);
 	
+	/**
+	 * 
+	 * @Description 通过用户名获取用户信息
+	 * @param @param username 用户名
+	 * @param @return
+	 * @return User
+	 */
+	User getUserByUserName(@Param("username") String username);
 
 }

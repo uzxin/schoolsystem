@@ -9,10 +9,12 @@
        http://www.springframework.org/schema/context/spring-context.xsd
        http://www.springframework.org/schema/mvc
        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    <!-- <import resource="spring-security.xml"/> -->
+    
     <!-- 初始化配置 -->
     <mvc:annotation-driven/>
     <!-- 装配Controller -->
-    <context:component-scan base-package="com.topcheersc.schoolsystem.controller"/>
+    <context:component-scan base-package="com.topcheersc.schoolsystem"/>
     <!-- 文件上传配置 -->
     <bean id="multipartResolver"
           class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
