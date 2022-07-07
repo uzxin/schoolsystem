@@ -10,7 +10,7 @@
   
   <properties>
 	  <!-- spring版本号 -->
-	  <spring.version>4.3.14.RELEASE</spring.version>
+	  <spring.version>5.2.21.RELEASE</spring.version>
 	  <security.version>4.2.4.RELEASE</security.version>
   </properties>
     
